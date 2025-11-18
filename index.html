@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+</head>
+<body>
+    <form onsubmit="getTodo(event)">
+        <label for="todo">Enter your Todo:
+            <input type="text" id="todo-input">
+        </label>
+        <input type="submit">
+    </form>
+    <div id="container"></div>
+    <script>
+    let todos;
+
+if(localStorage.getItem('todos')){ 
+    todos = JSON.parse(localStorage.getItem('todos'));
+    displayTodos();
+}
+else todos = [];
+
+function getTodo(event){
+    todos.push(document.getElementById('todo-input').value);
+    document.getElementById('todo-input').value = ''
+    displayTodos();
+    event.preventDefault();
+}
+
+function displayTodos(){
+    document.getElementById('container').innerHTML = "";
+
+    todos.map((todo, index)=>{
+        const div = document.createElement('div');
+        const p = document.createElement('p');
+        p.innerHTML = todo;
+        const button = document.createElement('button');
+        button.innerText = '❌';
+        button.onclick = function(){
+            removeTodo(index);
+        }
+        div.appendChild(p);
+        div.appendChild(button);
+        document.getElementById('container').appendChild(div);
+    })
+    localStorage.setItem('todos', JSON.stringify(todos));
+}
+
+function removeTodo(index){
+    todos.splice(index, 1);
+    displayTodos();
+}
+    </script>
+</body>
+</html>
+
+
