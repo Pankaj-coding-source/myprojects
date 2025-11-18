@@ -1,0 +1,31 @@
+
+import requests
+
+def get_news(location, api_key):
+    url = f"https://newsapi.org/v2/everything?q={location}&apiKey={api_key}"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        data = response.json()
+        articles = data.get("articles", [])
+        
+        if articles:
+            for i, article in enumerate(articles[:5], 1):  # Show top 5 articles
+                print(f"{i}. {article.get('title')}")
+                print(f"   Source: {article['source'].get('name')}")
+                print(f"   Link: {article.get('url')}\n")
+        else:
+            print("No news articles found for this location.")
+    
+    elif response.status_code == 401:
+        print("Error: Invalid or missing API key. Please check your API key.")
+    
+    else:
+        print(f"Error: {response.status_code} - {response.text}")
+
+
+# Example usage
+if __name__=="__main__":
+    api_key = "62f425894ac84ca482200c1a499e6d4c"  
+    location = input("Enter location: ")
+    get_news(location, api_key)
