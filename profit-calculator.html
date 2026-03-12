@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profit Calculator App</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #e2e8f0;
+      --accent: #22d3ee;
+      --ok: #22c55e;
+      --warn: #f59e0b;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: linear-gradient(180deg, #020617, #0f172a 40%, #1e293b);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .card {
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: 12px;
+      padding: 16px;
+      backdrop-filter: blur(4px);
+    }
+
+    h2 {
+      margin-top: 0;
+      color: var(--accent);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+      align-items: end;
+    }
+
+    label {
+      display: block;
+      font-size: 0.88rem;
+      margin-bottom: 5px;
+      color: #cbd5e1;
+    }
+
+    input, select, button {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px;
+      border: 1px solid #64748b;
+      border-radius: 8px;
+      background: #0b1222;
+      color: var(--text);
+    }
+
+    button {
+      background: #0891b2;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #06b6d4;
+    }
+
+    .result {
+      margin-top: 12px;
+      font-weight: bold;
+      font-size: 1rem;
+      color: var(--ok);
+    }
+
+    .result.loss {
+      color: #f87171;
+    }
+
+    .hint {
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Multi-Market Profit Calculator</h1>
+
+    <section class="card" id="sip-card">
+      <h2>SIP Profit Calculator</h2>
+      <div class="grid">
+        <div>
+          <label for="sip-monthly">Monthly Investment (₹)</label>
+          <input id="sip-monthly" type="number" min="0" placeholder="5000" />
+        </div>
+        <div>
+          <label for="sip-return">Expected Annual Return (%)</label>
+          <input id="sip-return" type="number" min="0" step="0.1" placeholder="12" />
+        </div>
+        <div>
+          <label for="sip-years">Investment Duration (Years)</label>
+          <input id="sip-years" type="number" min="1" placeholder="10" />
+        </div>
+        <div>
+          <button onclick="calculateSIP()">Calculate SIP Profit</button>
+        </div>
+      </div>
+      <div class="result" id="sip-result">Enter values to calculate your SIP growth.</div>
+    </section>
+
+    <section class="card" id="intraday-card">
+      <h2>Intraday Trading Profit Calculator</h2>
+      <div class="grid">
+        <div>
+          <label for="in-market">Market</label>
+          <select id="in-market">
+            <option value="equity">Equity</option>
+            <option value="forex">Forex</option>
+            <option value="commodity">Commodity</option>
+          </select>
+        </div>
+        <div>
+          <label for="in-side">Position</label>
+          <select id="in-side">
+            <option value="buy">Buy (Long)</option>
+            <option value="sell">Sell (Short)</option>
+          </select>
+        </div>
+        <div>
+          <label for="in-entry">Entry Price</label>
+          <input id="in-entry" type="number" min="0" step="0.01" placeholder="100" />
+        </div>
+        <div>
+          <label for="in-exit">Exit Price</label>
+          <input id="in-exit" type="number" min="0" step="0.01" placeholder="105" />
+        </div>
+        <div>
+          <label for="in-qty">Quantity</label>
+          <input id="in-qty" type="number" min="1" placeholder="10" />
+        </div>
+        <div>
+          <button onclick="calculateIntraday()">Calculate Intraday P/L</button>
+        </div>
+      </div>
+      <p class="hint">Each market uses an estimated one-way transaction charge for net P/L: Equity 0.05%, Forex 0.03%, Commodity 0.04%.</p>
+      <div class="result" id="intraday-result">Enter values to calculate intraday profit/loss.</div>
+    </section>
+
+    <section class="card" id="crypto-card">
+      <h2>Crypto Trading Profit Calculator</h2>
+      <div class="grid">
+        <div>
+          <label for="cr-side">Position</label>
+          <select id="cr-side">
+            <option value="buy">Buy (Long)</option>
+            <option value="sell">Sell (Short)</option>
+          </select>
+        </div>
+        <div>
+          <label for="cr-entry">Entry Price ($)</label>
+          <input id="cr-entry" type="number" min="0" step="0.01" placeholder="30000" />
+        </div>
+        <div>
+          <label for="cr-exit">Exit Price ($)</label>
+          <input id="cr-exit" type="number" min="0" step="0.01" placeholder="32000" />
+        </div>
+        <div>
+          <label for="cr-amount">Coin Amount</label>
+          <input id="cr-amount" type="number" min="0" step="0.0001" placeholder="0.1" />
+        </div>
+        <div>
+          <label for="cr-fee">Exchange Fee (%)</label>
+          <input id="cr-fee" type="number" min="0" step="0.01" value="0.1" />
+        </div>
+        <div>
+          <button onclick="calculateCrypto()">Calculate Crypto P/L</button>
+        </div>
+      </div>
+      <div class="result" id="crypto-result">Enter values to calculate crypto trade profit/loss.</div>
+    </section>
+  </div>
+
+  <script>
+    const inFeeByMarket = {
+      equity: 0.0005,
+      forex: 0.0003,
+      commodity: 0.0004
+    };
+
+    const currency = (value, symbol = '₹') => `${symbol}${value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+
+    function setResult(elementId, message, isLoss = false) {
+      const el = document.getElementById(elementId);
+      el.textContent = message;
+      el.classList.toggle('loss', isLoss);
+    }
+
+    function calculateSIP() {
+      const monthly = Number(document.getElementById('sip-monthly').value);
+      const annualRate = Number(document.getElementById('sip-return').value);
+      const years = Number(document.getElementById('sip-years').value);
+
+      if (!monthly || annualRate < 0 || !years) {
+        setResult('sip-result', 'Please provide valid SIP inputs.');
+        return;
+      }
+
+      const months = years * 12;
+      const monthlyRate = annualRate / 12 / 100;
+      const futureValue = monthlyRate === 0
+        ? monthly * months
+        : monthly * (((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) * (1 + monthlyRate));
+      const invested = monthly * months;
+      const profit = futureValue - invested;
+
+      setResult(
+        'sip-result',
+        `Invested: ${currency(invested)} | Estimated Value: ${currency(futureValue)} | Profit: ${currency(profit)}`,
+        profit < 0
+      );
+    }
+
+    function calculateIntraday() {
+      const market = document.getElementById('in-market').value;
+      const side = document.getElementById('in-side').value;
+      const entry = Number(document.getElementById('in-entry').value);
+      const exit = Number(document.getElementById('in-exit').value);
+      const qty = Number(document.getElementById('in-qty').value);
+
+      if (!entry || !exit || !qty) {
+        setResult('intraday-result', 'Please provide valid intraday inputs.');
+        return;
+      }
+
+      const gross = side === 'buy' ? (exit - entry) * qty : (entry - exit) * qty;
+      const turnover = (entry + exit) * qty;
+      const fee = turnover * inFeeByMarket[market] * 2;
+      const net = gross - fee;
+
+      setResult(
+        'intraday-result',
+        `Gross P/L: ${currency(gross)} | Charges: ${currency(fee)} | Net P/L: ${currency(net)}`,
+        net < 0
+      );
+    }
+
+    function calculateCrypto() {
+      const side = document.getElementById('cr-side').value;
+      const entry = Number(document.getElementById('cr-entry').value);
+      const exit = Number(document.getElementById('cr-exit').value);
+      const amount = Number(document.getElementById('cr-amount').value);
+      const feePercent = Number(document.getElementById('cr-fee').value);
+
+      if (!entry || !exit || !amount || feePercent < 0) {
+        setResult('crypto-result', 'Please provide valid crypto inputs.');
+        return;
+      }
+
+      const gross = side === 'buy' ? (exit - entry) * amount : (entry - exit) * amount;
+      const turnover = (entry + exit) * amount;
+      const fee = turnover * (feePercent / 100);
+      const net = gross - fee;
+
+      setResult(
+        'crypto-result',
+        `Gross P/L: ${currency(gross, '$')} | Fee: ${currency(fee, '$')} | Net P/L: ${currency(net, '$')}`,
+        net < 0
+      );
+    }
+  </script>
+</body>
+</html>
